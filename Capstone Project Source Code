@@ -1,0 +1,45 @@
+!pip install requests beautifulsoup4 pandas
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+URL = "https://en.wikipedia.org/wiki/Tourist_attractions_in_the_United_States"
+
+# Fetch the content of the URL
+response = requests.get(URL)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+# Locate the table for top tourist attractions
+table = soup.find_all('table')[0] # Based on the structure, assuming the first table contains the required information
+
+# Extracting the data from the table
+places = []
+for row in table.find_all('tr')[1:]:  # Skip the header row
+    columns = row.find_all('td')
+    place = columns[0].get_text(strip=True)
+    location = columns[1].get_text(strip=True)
+    visitors = columns[2].get_text(strip=True)
+    places.append({
+        "Place": place,
+        "Location": location,
+        "Visitors (millions)": visitors
+    })
+
+# Convert the list of dictionaries to a DataFrame
+df = pd.DataFrame(places)
+
+# Print the DataFrame
+df
+
+# Optionally, save the DataFrame to a CSV file
+# df.to_csv("tourist_attractions.csv", index=False)
+# Remove bracketed values from 'Visitors (millions)' column
+df['Visitors (millions)'] = df['Visitors (millions)'].str.replace(r'\[.*\]', '', regex=True)
+
+# Print the DataFrame
+
+df
